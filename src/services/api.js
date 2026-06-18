@@ -10,6 +10,7 @@ const CAMPUS_CENTER = {
 const BUILDING_CATALOG = {
   "biblioteca": {
     id: 1,
+    mapNumber: 19,
     code: "BIB",
     name: "Biblioteca Facultad Ciencias y Tecnología",
     zone: "FCyT",
@@ -18,6 +19,7 @@ const BUILDING_CATALOG = {
   },
   "c.a.e.": {
     id: 2,
+    mapNumber: 47,
     code: "CAE",
     name: "Educación Asistida por Computador",
     zone: "FCyT",
@@ -26,6 +28,7 @@ const BUILDING_CATALOG = {
   },
   "cafe docente": {
     id: 3,
+    mapNumber: 48,
     code: "CAF",
     name: "Café Docente",
     zone: "Campus Central",
@@ -34,6 +37,7 @@ const BUILDING_CATALOG = {
   },
   "central": {
     id: 4,
+    mapNumber: 1,
     code: "UMSS",
     name: "Campus Central UMSS",
     zone: "Campus Central",
@@ -42,6 +46,7 @@ const BUILDING_CATALOG = {
   },
   "centro de aguas": {
     id: 5,
+    mapNumber: 3,
     code: "CASA",
     name: "Centro de Aguas y Saneamiento Ambiental",
     zone: "FCyT",
@@ -50,6 +55,7 @@ const BUILDING_CATALOG = {
   },
   "centros alimentos y productos naturales": {
     id: 6,
+    mapNumber: 6,
     code: "CAPN",
     name: "Centro de Alimentos y Productos Naturales",
     zone: "FCyT",
@@ -58,6 +64,7 @@ const BUILDING_CATALOG = {
   },
   "centro de biodiversidad y genetica": {
     id: 7,
+    mapNumber: 8,
     code: "CBG",
     name: "Centro de Biodiversidad y Genética",
     zone: "FCyT",
@@ -66,6 +73,7 @@ const BUILDING_CATALOG = {
   },
   "centro de estudiantes de informatica": {
     id: 8,
+    mapNumber: 35,
     code: "SCESI",
     name: "Centro de Estudiantes de Informática",
     zone: "FCyT",
@@ -74,6 +82,7 @@ const BUILDING_CATALOG = {
   },
   "centro tecno agro industrial": {
     id: 9,
+    mapNumber: 25,
     code: "CTA",
     name: "Centro de Tecnología Agroindustrial",
     zone: "FCyT",
@@ -82,22 +91,25 @@ const BUILDING_CATALOG = {
   },
   "c.i.e.e. electronica": {
     id: 10,
+    mapNumber: 17,
     code: "CEIEE",
     name: "Centro de Estudiantes de Ingeniería Eléctrica y Electrónica",
     zone: "FCyT",
     lat: -17.3934237,
     lng: -66.1453649,
   },
-  "citema saproqui": {
+  "citema laproqui": {
     id: 11,
+    mapNumber: 27,
     code: "CITEMA",
-    name: "CITEMA SAPROQUI",
+    name: "CITEMA LAPROQUI",
     zone: "FCyT",
     lat: -17.3938810,
     lng: -66.1442150,
   },
   "dpto. de fisica": {
     id: 12,
+    mapNumber: 4,
     code: "FIS",
     name: "Departamento de Física",
     zone: "FCyT",
@@ -106,6 +118,7 @@ const BUILDING_CATALOG = {
   },
   "dpto. ing. electrica y electronica": {
     id: 13,
+    mapNumber: 15,
     code: "ELEC",
     name: "Departamento de Ingeniería Eléctrica y Electrónica",
     zone: "FCyT",
@@ -114,6 +127,7 @@ const BUILDING_CATALOG = {
   },
   "dpto. ing. industrial": {
     id: 14,
+    mapNumber: 31,
     code: "IND",
     name: "Departamento de Industrias",
     zone: "FCyT",
@@ -122,6 +136,7 @@ const BUILDING_CATALOG = {
   },
   "dpto. ing. informatica y sistemas": {
     id: 15,
+    mapNumber: 43,
     code: "INF",
     name: "Departamento de Informática y Sistemas",
     zone: "FCyT",
@@ -130,6 +145,7 @@ const BUILDING_CATALOG = {
   },
   "dpto. quimica": {
     id: 16,
+    mapNumber: 7,
     code: "QUI",
     name: "Departamento de Química",
     zone: "FCyT",
@@ -138,6 +154,7 @@ const BUILDING_CATALOG = {
   },
   "edificio academico 1": {
     id: 17,
+    mapNumber: 37,
     code: "EA1",
     name: "Edificio Académico 1",
     zone: "Campus Central",
@@ -146,6 +163,7 @@ const BUILDING_CATALOG = {
   },
   "edificio academico 2": {
     id: 18,
+    mapNumber: 38,
     code: "EA2",
     name: "Edificio Académico 2",
     zone: "FCyT",
@@ -154,6 +172,7 @@ const BUILDING_CATALOG = {
   },
   "edificio c.a.d. y c.a.m.": {
     id: 19,
+    mapNumber: 28,
     code: "CAD",
     name: "Edificio C.A.D. y C.A.M.",
     zone: "Campus Central",
@@ -162,6 +181,7 @@ const BUILDING_CATALOG = {
   },
   "embate": {
     id: 20,
+    mapNumber: 16,
     code: "EMB",
     name: "EMBATE",
     zone: "Campus Central",
@@ -170,6 +190,7 @@ const BUILDING_CATALOG = {
   },
   "instituto de investigacion utt": {
     id: 21,
+    mapNumber: 3,
     code: "UTT",
     name: "Instituto de Investigación UTT",
     zone: "FCyT",
@@ -178,6 +199,7 @@ const BUILDING_CATALOG = {
   },
   "m.e.m.i.": {
     id: 22,
+    mapNumber: 41,
     code: "MEMI",
     name: "Centro de Mejoramiento de la Enseñanza de la Matemática e Informática",
     zone: "FCyT",
@@ -186,6 +208,7 @@ const BUILDING_CATALOG = {
   },
   "planta piloto de produccion industrial": {
     id: 23,
+    mapNumber: 39,
     code: "PPI",
     name: "Planta Piloto de Procesos Industriales",
     zone: "FCyT",
@@ -194,6 +217,7 @@ const BUILDING_CATALOG = {
   },
   "snack tecnologia": {
     id: 24,
+    mapNumber: 2,
     code: "SNACK",
     name: "Snack Tecnología",
     zone: "FCyT",
@@ -202,6 +226,7 @@ const BUILDING_CATALOG = {
   },
   "vakita": {
     id: 25,
+    mapNumber: 49,
     code: "VAK",
     name: "Vakita",
     zone: "Campus Central",
@@ -267,14 +292,17 @@ export async function predictBuilding(file) {
 
     const best = prediction[0];
 
-    return {
-      building: enrichBuilding(best.className),
-      confidence: best.probability,
-      matches: prediction.map(p => ({
-        building: enrichBuilding(p.className),
-        confidence: p.probability,
-      })),
-    };
+   return {
+        building: enrichBuilding(best.className),
+        confidence: best.probability,
+
+        matches: prediction
+          .slice(1, 4)
+          .map(p => ({
+            building: enrichBuilding(p.className),
+            confidence: p.probability,
+          })),
+      };
   } finally {
     URL.revokeObjectURL(imageUrl);
   }

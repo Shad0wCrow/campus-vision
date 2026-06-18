@@ -387,7 +387,7 @@ export default function Result() {
   }
 
   const { result, previewUrl, fileName } = state;
-
+  const mapNumber = result?.building?.mapNumber;
   return (
     <main className="result-page">
       <div className="container">
@@ -413,7 +413,44 @@ export default function Result() {
               <p><strong>Archivo analizado:</strong>&nbsp;{fileName || 'imagen.jpg'}</p>
             </div>
           </div>
+          <div
+              style={{
+                marginTop: 24,
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--r-xl)',
+                overflow: 'hidden',
+                boxShadow: 'var(--shadow-md)',
+              }}
+            >
+              <div
+                style={{
+                  padding: '20px',
+                  textAlign: 'center',
+                }}
+              >
+                <h3 style={{ color: 'var(--primary)' }}>
+                  📍 Ubicación en el mapa del campus
+                </h3>
 
+                <p>
+                  El edificio identificado es{' '}
+                  <strong>{result.building.name}</strong>
+                  {' '}y corresponde al número{' '}
+                  <strong>{mapNumber}</strong>
+                  {' '}dentro del mapa del campus universitario.
+                </p>
+              </div>
+
+              <img
+                src="./mapa-campus.jpeg"
+                alt="Mapa del Campus UMSS"
+                style={{
+                  width: '100%',
+                  display: 'block',
+                }}
+              />
+            </div>
           <div className="fade-in fade-in-delay-2">
             <ResultCard result={result} />
             <div style={{ marginTop: 16 }}>
