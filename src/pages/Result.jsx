@@ -1,4 +1,7 @@
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import ResultCard from '../components/ResultCard';
 
 function IconArrowLeft() {
@@ -67,19 +70,176 @@ function IconLayers() {
   );
 }
 
-// ─── Improved Map Placeholder ─────────────────────────────────
-// Ready for: Google Maps, Leaflet, OpenStreetMap
-// To integrate Leaflet:
-//   1. npm install react-leaflet leaflet
-//   2. Replace #map-container contents with <MapContainer ...>
-// To integrate Google Maps:
-//   1. npm install @googlemaps/js-api-loader
-//   2. Add <div ref={mapRef} /> inside #map-container and init in useEffect
+const CAMPUS_CENTER = {
+  lat: -17.3937491,
+  lng: -66.1457166,
+};
+
+function getMapCoordinates(building) {
+  const lat = Number(building?.lat);
+  const lng = Number(building?.lng);
+
+  if (Number.isFinite(lat) && Number.isFinite(lng)) {
+    return { lat, lng };
+  }
+
+  return CAMPUS_CENTER;
+}
+
+function RecenterMap({ lat, lng }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setView([lat, lng], 19);
+  }, [lat, lng, map]);
+
+  return null;
+}
+
+function RouteBounds({ positions }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (positions.length > 1) {
+      map.fitBounds(positions, { padding: [36, 36], maxZoom: 19 });
+    }
+  }, [positions, map]);
+
+  return null;
+}
+
+const buildingIcon = L.divIcon({
+  className: '',
+  html: `
+    <div style="
+      width:36px; height:36px;
+      background:#2563EB;
+      border-radius:50% 50% 50% 4px;
+      transform:rotate(-45deg);
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 4px 14px rgba(37,99,235,0.45);
+      border:2px solid white;
+    ">
+      <div style="
+        transform:rotate(45deg);
+        color:white; font-size:14px;
+        display:flex; align-items:center; justify-content:center;
+        width:100%; height:100%;
+      ">📍</div>
+    </div>
+  `,
+  iconSize: [36, 36],
+  iconAnchor: [18, 36],
+  popupAnchor: [0, -38],
+});
+
+const userLocationIcon = L.divIcon({
+  className: '',
+  html: `
+    <div style="
+      width:22px; height:22px;
+      background:#0EA5E9;
+      border:3px solid white;
+      border-radius:50%;
+      box-shadow:0 0 0 5px rgba(14,165,233,0.22), 0 4px 12px rgba(15,23,42,0.22);
+    "></div>
+  `,
+  iconSize: [22, 22],
+  iconAnchor: [11, 11],
+  popupAnchor: [0, -12],
+});
+
+const ROUTE_SERVICES = [
+  (from, to) => `https://routing.openstreetmap.de/routed-foot/route/v1/foot/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`,
+  (from, to) => `https://router.project-osrm.org/route/v1/foot/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`,
+  (from, to) => `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`,
+];
+
+function getCurrentPosition() {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 60000,
+    });
+  });
+}
+
+async function fetchRoutePositions(from, to) {
+  let lastError;
+
+  for (const createUrl of ROUTE_SERVICES) {
+    try {
+      const response = await fetch(createUrl(from, to));
+      if (!response.ok) throw new Error('No se pudo consultar el servicio de rutas.');
+
+      const data = await response.json();
+      const coordinates = data.routes?.[0]?.geometry?.coordinates;
+
+      if (Array.isArray(coordinates) && coordinates.length > 1) {
+        return coordinates.map(([routeLng, routeLat]) => [routeLat, routeLng]);
+      }
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error('No se pudo calcular la ruta.');
+}
 
 function MapPlaceholder({ building }) {
+  const [locating, setLocating] = useState(false);
+  const [userPosition, setUserPosition] = useState(null);
+  const [routePositions, setRoutePositions] = useState([]);
+  const [routeIsFallback, setRouteIsFallback] = useState(false);
+  const [routeMessage, setRouteMessage] = useState('');
   const code = building?.code?.slice(0, 2) || '??';
   const name = building?.name || 'Edificio identificado';
   const zone = building?.zone ? `Zona ${building.zone}` : 'Campus UMSS';
+  const { lat, lng } = getMapCoordinates(building);
+
+  useEffect(() => {
+    setUserPosition(null);
+    setRoutePositions([]);
+    setRouteIsFallback(false);
+    setRouteMessage('');
+  }, [lat, lng]);
+
+  async function handleDirectionsClick() {
+    if (!navigator.geolocation) {
+      setRouteMessage('Tu navegador no permite obtener ubicación.');
+      return;
+    }
+
+    setLocating(true);
+    setRouteMessage('Buscando tu ubicación...');
+    setRouteIsFallback(false);
+
+    try {
+      const { coords } = await getCurrentPosition();
+      const origin = { lat: coords.latitude, lng: coords.longitude };
+      const destination = { lat, lng };
+
+      setUserPosition([origin.lat, origin.lng]);
+      setRouteMessage('Calculando ruta...');
+
+      try {
+        const positions = await fetchRoutePositions(origin, destination);
+        setRoutePositions(positions);
+        setRouteMessage('Ruta trazada desde tu ubicación.');
+      } catch {
+        setRoutePositions([[origin.lat, origin.lng], [destination.lat, destination.lng]]);
+        setRouteIsFallback(true);
+        setRouteMessage('Ruta no disponible; se muestra línea directa.');
+      }
+    } catch {
+      setUserPosition(null);
+      setRoutePositions([]);
+      setRouteMessage('Permite tu ubicación para trazar la ruta.');
+    } finally {
+      setLocating(false);
+    }
+  }
 
   return (
     <div className="map-card fade-in fade-in-delay-3">
@@ -102,104 +262,67 @@ function MapPlaceholder({ building }) {
         </div>
       </div>
 
-      {/* Map viewport — replace inner content when integrating real map */}
-      <div id="map-container" className="map-viewport" role="img" aria-label={`Mapa de ubicación: ${name}`}>
-
-        {/* ── Decorative map background ── */}
-        {/* Street grid */}
-        <svg className="map-bg-grid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="grid-minor" width="36" height="36" patternUnits="userSpaceOnUse">
-              <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#C9D9F0" strokeWidth="0.5" />
-            </pattern>
-            <pattern id="grid-major" width="144" height="144" patternUnits="userSpaceOnUse">
-              <rect width="144" height="144" fill="url(#grid-minor)" />
-              <path d="M 144 0 L 0 0 0 144" fill="none" stroke="#B8CCE8" strokeWidth="1" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid-major)" />
-        </svg>
-
-        {/* Road network */}
-        <svg className="map-bg-roads" aria-hidden="true" viewBox="0 0 700 320" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-          {/* Main avenues */}
-          <rect x="0" y="140" width="700" height="16" rx="2" fill="#DDEAF8" />
-          <rect x="330" y="0" width="16" height="320" rx="2" fill="#DDEAF8" />
-          {/* Secondary streets */}
-          <rect x="0" y="72" width="700" height="8" rx="1" fill="#E8F0F8" />
-          <rect x="0" y="230" width="700" height="8" rx="1" fill="#E8F0F8" />
-          <rect x="165" y="0" width="8" height="320" rx="1" fill="#E8F0F8" />
-          <rect x="512" y="0" width="8" height="320" rx="1" fill="#E8F0F8" />
-          {/* Street center lines */}
-          <line x1="0" y1="148" x2="700" y2="148" stroke="#C4D8F0" strokeWidth="1" strokeDasharray="12 8" />
-          <line x1="338" y1="0" x2="338" y2="320" stroke="#C4D8F0" strokeWidth="1" strokeDasharray="12 8" />
-          {/* Campus blocks */}
-          <rect x="190" y="28" width="120" height="88" rx="8" fill="#D4E8C2" opacity="0.7" />
-          <rect x="370" y="28" width="120" height="88" rx="8" fill="#D4E8C2" opacity="0.6" />
-          <rect x="60" y="168" width="90" height="68" rx="8" fill="#C8DFF8" opacity="0.6" />
-          <rect x="190" y="168" width="120" height="68" rx="8" fill="#C8DFF8" opacity="0.5" />
-          <rect x="370" y="168" width="100" height="68" rx="8" fill="#C8DFF8" opacity="0.5" />
-          <rect x="520" y="168" width="100" height="68" rx="8" fill="#C8DFF8" opacity="0.6" />
-          {/* Building labels */}
-          <text x="250" y="68" fill="#8AAAC8" fontSize="9" textAnchor="middle" fontFamily="Inter, sans-serif">Bloque A</text>
-          <text x="430" y="68" fill="#8AAAC8" fontSize="9" textAnchor="middle" fontFamily="Inter, sans-serif">Bloque B</text>
-          <text x="250" y="200" fill="#8AAAC8" fontSize="9" textAnchor="middle" fontFamily="Inter, sans-serif">Bloque C</text>
-          <text x="420" y="200" fill="#8AAAC8" fontSize="9" textAnchor="middle" fontFamily="Inter, sans-serif">Bloque D</text>
-          {/* Parking */}
-          <rect x="560" y="28" width="80" height="50" rx="6" fill="#EEF0F4" opacity="0.8" />
-          <text x="600" y="58" fill="#9AAAB8" fontSize="8" textAnchor="middle" fontFamily="Inter, sans-serif">P</text>
-          {/* Green areas */}
-          <circle cx="100" cy="100" r="28" fill="#C8E6B0" opacity="0.5" />
-          <circle cx="600" cy="260" r="22" fill="#C8E6B0" opacity="0.5" />
-        </svg>
-
-        {/* Marker shadow */}
-        <div className="map-marker-shadow" />
-
-        {/* Main location marker */}
-        <div className="map-marker">
-          <div className="map-marker-pin">
-            <div className="map-marker-pin-inner">
-              <IconMapPin />
-            </div>
-          </div>
-          <div className="map-marker-pulse-ring" />
-          <div className="map-marker-pulse-ring map-marker-pulse-ring-2" />
-          {/* Tooltip */}
-          <div className="map-marker-tooltip">
-            <span className="map-marker-tooltip-code">{code}</span>
-            <span className="map-marker-tooltip-name">{name}</span>
-          </div>
-        </div>
-
-        {/* Map controls */}
-        <div className="map-controls">
-          <button className="map-control-btn" title="Acercar" type="button" aria-label="Acercar mapa">+</button>
-          <div className="map-control-divider" />
-          <button className="map-control-btn" title="Alejar" type="button" aria-label="Alejar mapa">−</button>
-        </div>
-
-        {/* Compass */}
-        <div className="map-compass" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <polygon points="12 2 14 10 12 12 10 10" fill="var(--primary)" stroke="none" />
-            <polygon points="12 22 10 14 12 12 14 14" fill="#94A3B8" stroke="none" />
-          </svg>
-          <span>N</span>
-        </div>
-
-        {/* Integration badge */}
-        <div className="map-integration-badge">
-          <span className="map-integration-dot" />
-          Mapa en integración · Leaflet / Google Maps / OSM
-        </div>
-
-        {/* Scale bar */}
-        <div className="map-scale-bar" aria-hidden="true">
-          <div className="map-scale-line" />
-          <span>100 m</span>
-        </div>
+      <div id="map-container" className="map-viewport">
+        <MapContainer
+          center={[lat, lng]}
+          zoom={19}
+          maxZoom={21}
+          style={{ width: '100%', height: '100%' }}
+          zoomControl={true}
+          scrollWheelZoom={true}
+          attributionControl={true}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors'
+            maxNativeZoom={19}
+            maxZoom={21}
+          />
+          <RecenterMap lat={lat} lng={lng} />
+          {routePositions.length > 1 && (
+            <>
+              <Polyline
+                positions={routePositions}
+                pathOptions={{
+                  color: '#2563EB',
+                  weight: 5,
+                  opacity: 0.86,
+                  dashArray: routeIsFallback ? '8 10' : undefined,
+                }}
+              />
+              <RouteBounds positions={routePositions} />
+            </>
+          )}
+          {userPosition && (
+            <Marker position={userPosition} icon={userLocationIcon}>
+              <Popup>
+                <div style={{ fontFamily: 'Inter, sans-serif', minWidth: 120 }}>
+                  <p style={{ fontWeight: 700, fontSize: 13, color: '#0F172A', margin: '0 0 4px' }}>
+                    Tu ubicación
+                  </p>
+                  <p style={{ fontSize: 11, color: '#64748B', margin: 0 }}>
+                    Punto de partida
+                  </p>
+                </div>
+              </Popup>
+            </Marker>
+          )}
+          <Marker position={[lat, lng]} icon={buildingIcon}>
+            <Popup>
+              <div style={{ fontFamily: 'Inter, sans-serif', minWidth: 160 }}>
+                <p style={{ fontWeight: 700, fontSize: 13, color: '#0F172A', margin: '0 0 4px' }}>
+                  {name}
+                </p>
+                <p style={{ fontSize: 11, color: '#64748B', margin: '0 0 2px' }}>
+                  {zone} · Campus UMSS
+                </p>
+                <p style={{ fontSize: 11, color: '#94A3B8', margin: 0 }}>
+                  {lat.toFixed(4)}, {lng.toFixed(4)}
+                </p>
+              </div>
+            </Popup>
+          </Marker>
+        </MapContainer>
       </div>
 
       {/* Footer */}
@@ -216,14 +339,15 @@ function MapPlaceholder({ building }) {
         </div>
 
         <div className="map-footer-actions">
-          <button className="map-action-btn" type="button">
+          <button className="map-action-btn map-action-btn-primary" onClick={handleDirectionsClick} disabled={locating} type="button">
             <IconNavigation />
-            Cómo llegar
+            {locating ? 'Trazando ruta...' : routePositions.length > 1 ? 'Actualizar ruta' : 'Cómo llegar'}
           </button>
-          <button className="map-action-btn map-action-btn-primary" type="button">
-            <IconMapPin />
-            Ver en mapa
-          </button>
+          {routeMessage && (
+            <span style={{ maxWidth: 220, fontSize: 11, lineHeight: 1.3, color: '#64748B' }}>
+              {routeMessage}
+            </span>
+          )}
         </div>
       </div>
     </div>
