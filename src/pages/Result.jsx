@@ -344,9 +344,7 @@ function MapPlaceholder({ building }) {
             {locating ? 'Trazando ruta...' : routePositions.length > 1 ? 'Actualizar ruta' : 'Cómo llegar'}
           </button>
           {routeMessage && (
-            <span style={{ maxWidth: 220, fontSize: 11, lineHeight: 1.3, color: '#64748B' }}>
-              {routeMessage}
-            </span>
+            <span className="map-route-status">{routeMessage}</span>
           )}
         </div>
       </div>
