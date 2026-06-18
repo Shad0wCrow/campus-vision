@@ -77,8 +77,8 @@ const BUILDING_CATALOG = {
     code: "SCESI",
     name: "Centro de Estudiantes de Informática",
     zone: "FCyT",
-    lat: -17.3932700,
-    lng: -66.1449258,
+    lat: -17.392690,
+    lng: -66.1467000,
   },
   "centro tecno agro industrial": {
     id: 9,
