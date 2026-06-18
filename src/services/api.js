@@ -1,3 +1,15 @@
+/**
+ * services/api.js
+ *
+ * Capa de servicio para comunicación con el backend.
+ * Por ahora devuelve datos mock.
+ * Cuando el backend esté listo, solo se modifica este archivo.
+ *
+ * Base URL de ejemplo para producción:
+ * const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+ */
+
+// ─── Datos mock internos (solo para simular predicción) ───────
 
 const MOCK_BUILDINGS = [
   { id: 1,  code: 'FCyT',  name: 'Facultad de Ciencias y Tecnología', zone: 'Norte',   year: 1987 },
@@ -39,9 +51,22 @@ function getMockPrediction(building) {
     })),
   };
 }
-//@param {File} imageFile 
-//@returns {Promise<{building: Object, confidence: number, matches: Array}>}
 
+// ─── Funciones públicas ───────────────────────────────────────
+
+/**
+ * Envía una imagen al backend para identificar el edificio.
+ * Reemplazar el mock con:
+ *
+ *   const formData = new FormData();
+ *   formData.append('image', imageFile);
+ *   const res = await fetch(`${BASE_URL}/predict`, { method: 'POST', body: formData });
+ *   if (!res.ok) throw new Error('Error en la predicción');
+ *   return await res.json();
+ *
+ * @param {File} imageFile - Archivo de imagen seleccionado por el usuario
+ * @returns {Promise<{building: Object, confidence: number, matches: Array}>}
+ */
 export async function predictBuilding(imageFile) {
   await new Promise(resolve => setTimeout(resolve, 2200));
 

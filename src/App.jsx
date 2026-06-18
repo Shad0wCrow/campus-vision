@@ -5,9 +5,9 @@ import AppRouter from './router';
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="sansilens-app">
+      <div className="app-wrapper">
         <Navbar />
-        <div className="sansilens-main-layout">
+        <div className="page-content">
           <AppRouter />
         </div>
       </div>
