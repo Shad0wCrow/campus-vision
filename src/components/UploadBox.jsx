@@ -86,10 +86,15 @@ export default function UploadBox({ onFileSelect, selectedFile, previewUrl }) {
     setError('');
   }
 
-  function handleClick() {
+  function openFileDialog() {
     if (!selectedFile) {
       inputRef.current?.click();
     }
+  }
+
+  function handleClick(e) {
+    if (e.target === inputRef.current) return;
+    openFileDialog();
   }
 
   const hasImage = Boolean(selectedFile && previewUrl);
@@ -105,7 +110,12 @@ export default function UploadBox({ onFileSelect, selectedFile, previewUrl }) {
         role="button"
         tabIndex={0}
         aria-label="Área para subir imagen del edificio"
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openFileDialog();
+          }
+        }}
       >
         {!hasImage && (
           <input
@@ -113,6 +123,7 @@ export default function UploadBox({ onFileSelect, selectedFile, previewUrl }) {
             type="file"
             accept={ACCEPTED_TYPES.join(',')}
             onChange={handleInputChange}
+            onClick={(e) => e.stopPropagation()}
             aria-hidden="true"
             tabIndex={-1}
           />
