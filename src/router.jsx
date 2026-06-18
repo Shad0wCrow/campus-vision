@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Result from './pages/Result';
-import Reconocimiento from "./pages/Reconocimiento";
+import Reconocimiento from "./components/Reconocimiento";
 
 export default function AppRouter() {
   return (
