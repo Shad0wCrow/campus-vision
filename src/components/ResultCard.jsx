@@ -23,6 +23,7 @@ function getConfidenceLabel(value) {
 export default function ResultCard({ result }) {
   const [animated, setAnimated] = useState(false);
 
+  // Trigger bar animation after mount
   useEffect(() => {
     const t = setTimeout(() => setAnimated(true), 80);
     return () => clearTimeout(t);
@@ -34,11 +35,13 @@ export default function ResultCard({ result }) {
 
   return (
     <div className="result-main-card fade-in">
+      {/* Header bar */}
       <div className="result-top-bar">
         <IconCheck />
         <span>Edificio identificado</span>
       </div>
 
+      {/* Main result */}
       <div className="result-building-info">
         <h2 className="result-building-name">{building.name}</h2>
 
@@ -63,6 +66,7 @@ export default function ResultCard({ result }) {
         )}
       </div>
 
+      {/* Top matches */}
       {matches && matches.length > 0 && (
         <div className="result-matches">
           <h3>Otras coincidencias</h3>

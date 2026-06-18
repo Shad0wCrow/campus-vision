@@ -6,6 +6,7 @@ let model;
 export async function loadModel() {
   if (model) return model;
 
+
   const modelURL = "/modelo/model.json";
   const metadataURL = "/modelo/metadata.json";
 

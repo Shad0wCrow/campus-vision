@@ -60,6 +60,7 @@ export default function UploadBox({ onFileSelect, selectedFile, previewUrl }) {
   function handleInputChange(e) {
     const file = e.target.files?.[0];
     validateAndSet(file);
+    // reset input so the same file can be re-selected after clearing
     e.target.value = '';
   }
 
